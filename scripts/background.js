@@ -46,7 +46,7 @@ async function getAttachmentDetailsOfSelectedMessages(info) {
 	let currentPage = info.selectedMessages;
 	if (currentPage.messages.length == 0){
 		browser.attachmentExtractorApi.showAlertToUser("Oops", "No message selected. Please select a message (or multiple) with an attachment.");
-		return;
+		return null;
 	}
 
 	// Iterate through the messages
@@ -121,6 +121,9 @@ async function onClicked(info, tab){
 	}
 
 	const allMessageAttachmentDetails = await getAttachmentDetailsOfSelectedMessages(info);
+	if (allMessageAttachmentDetails == null) {
+		return;
+	}
 	const processableAttachmentDetails = await getMessagesWithProcessableAttachments(allMessageAttachmentDetails);
 
 	if (!await checkProcessableAttachments(allMessageAttachmentDetails, processableAttachmentDetails, getActionText(info.menuItemId))) {
@@ -180,7 +183,7 @@ async function onClicked(info, tab){
 		}
 	}
 	else if (info.menuItemId == "delete-attachments") {
-		listAttachmentsNames = processableAttachmentDetails.flatMap(d => d.attachments.map(a => a.name));
+		const listAttachmentsNames = processableAttachmentDetails.flatMap(d => d.attachments.map(a => a.name));
 		if (await browser.attachmentExtractorApi.showPromptToUser(
 				`Delete attachments`,
 				`Do you wish to delete these attachments from your e-mails? (Irreversible!)\n - ${
